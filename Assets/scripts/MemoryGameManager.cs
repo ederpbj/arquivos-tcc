@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MemoryGameManager : MonoBehaviour
 {
-    [Serializable] public GameObject[] cards; // Array para as cartas
+    public GameObject[] cards; // Array para as cartas
     public Transform[] cardPositions; // Posições onde as cartas serão colocadas
 
     void Start()
