@@ -51,5 +51,5 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "arquivos tcc.sln"
+    "dotnet.defaultSolution": "arquivos-tcc.sln"
 }
