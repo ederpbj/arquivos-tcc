@@ -1,53 +1,26 @@
 using UnityEngine;
-using UnityEngine.UI;
 
 public class ButtonSoundManager : MonoBehaviour
 {
-    public Button optionsButton; // Referência ao botão de opções
-    public AudioSource buttonClickSound; // Referência ao som do botão
-
-    void Awake()
-    {
-        // Inicialize referências e verifique se estão atribuídas
-        if (optionsButton == null)
-        {
-            Debug.LogError("OptionsButton não está atribuído no Awake!");
-        }
-        if (buttonClickSound == null)
-        {
-            Debug.LogError("ButtonClickSound não está atribuído no Awake!");
-        }
-    }
+    public AudioClip clickSound; // Arraste seu som aqui no Inspector
+    private AudioSource audioSource;
 
     void Start()
     {
-        // Verificar se optionsButton e buttonClickSound não são nulos
-        if (optionsButton != null)
-        {
-            if (buttonClickSound != null)
-            {
-                optionsButton.onClick.AddListener(PlayButtonClickSound);
-            }
-            else
-            {
-                Debug.LogError("ButtonClickSound é nulo na função Start!");
-            }
-        }
-        else
-        {
-            Debug.LogError("OptionsButton é nulo na função Start!");
-        }
+        audioSource = gameObject.AddComponent<AudioSource>();
+        audioSource.clip = clickSound;
+        audioSource.playOnAwake = false; // Não tocar automaticamente ao iniciar
     }
 
-    void PlayButtonClickSound()
+    public void PlayClickSound()
     {
-        if (buttonClickSound != null)
+        if (audioSource != null && audioSource.enabled) // Verifica se o AudioSource está habilitado
         {
-            buttonClickSound.Play();
+            audioSource.PlayOneShot(clickSound);
         }
         else
         {
-            Debug.LogError("ButtonClickSound é nulo ao tentar tocar o som!");
+            Debug.LogWarning("AudioSource está desativado!");
         }
     }
 }

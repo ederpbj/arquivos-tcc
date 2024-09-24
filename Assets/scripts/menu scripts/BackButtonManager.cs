@@ -1,65 +1,21 @@
 using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement; // Necessário para gerenciar cenas
+using UnityEngine.SceneManagement;
 
-public class BackButtonManager : MonoBehaviour
+public class BackButton : MonoBehaviour
 {
-    public Button backButton;         // Referência ao botão "Voltar"
-    public AudioSource buttonClickSound; // Referência ao som do botão
+    public ButtonSoundManager soundManager; // Arraste seu ButtonSoundManager aqui no Inspector
 
-    void Start()
+    public void OnBackButtonClick()
     {
-        // Adiciona um listener ao botão "Voltar"
-        if (backButton != null)
-        {
-            backButton.onClick.AddListener(OnBackButtonClick);
-        }
-        else
-        {
-            Debug.LogError("BackButton não está atribuído no Inspector!");
-        }
+        // Reproduzir o som
+        soundManager.PlayClickSound();
 
-        // Verifica se o AudioSource está atribuído
-        if (buttonClickSound == null)
-        {
-            Debug.LogError("ButtonClickSound não está atribuído no Inspector!");
-        }
+        // Mudar a cena após um pequeno atraso para garantir que o som seja ouvido
+        Invoke("ChangeScene", 0.5f); // Ajuste o tempo conforme necessário
     }
 
-    void OnBackButtonClick()
+    private void ChangeScene()
     {
-        // Reproduz o som do botão
-        if (buttonClickSound != null)
-        {
-            buttonClickSound.Play();
-        }
-        else
-        {
-            Debug.LogError("ButtonClickSound é nulo ao tentar tocar o som!");
-        }
-
-        // Lógica para retornar à cena anterior
-        GoBackToPreviousScene();
-    }
-
-    void GoBackToPreviousScene()
-    {
-        // Retorna à cena anterior. Gerencie o histórico de cenas conforme necessário
-        if (SceneManager.sceneCountInBuildSettings > 1) // Verifica se há mais de uma cena disponível
-        {
-            int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
-            if (currentSceneIndex > 0) // Verifica se não é a primeira cena
-            {
-                SceneManager.LoadScene(currentSceneIndex - 1);
-            }
-            else
-            {
-                Debug.LogWarning("Não há uma cena anterior disponível.");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("Não há cenas suficientes para voltar.");
-        }
+        SceneManager.LoadScene("NomeDaSuaCena"); // Troque pelo nome da cena que deseja carregar
     }
 }
