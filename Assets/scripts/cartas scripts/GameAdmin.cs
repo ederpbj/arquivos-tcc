@@ -1,66 +1,177 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameAdmin : MonoBehaviour
 {
-    public GameObject congratulationsPanel; // Painel de Parabéns
-    public GameObject gameOverPanel; // Painel de Game Over
-    public Text scoreText; // Texto que mostra a pontuação
-    public float timeLimit = 100f; // Tempo total
-    private float timeRemaining;
-    private int score = 0;
-    private int matchedPairs = 0; // Para contar os pares encontrados
+    public static int score = 0;
+    public TextMeshProUGUI scoreText;
+    public string gameOverSceneName = "FimDeJogo";
+    private static List<int> shuffledSceneIndices = new List<int>();
+    private static int currentSceneIndex = 0;
+
+    // Referência ao controlador do painel de parabéns
+    public ParabensPanelController parabenPanelController;
+
+    // Variável para verificar se todos os pares foram combinados
+    private bool todosOsParesCombinados = false;
 
     void Start()
     {
-        timeRemaining = timeLimit;
-        gameOverPanel.SetActive(false);
-        congratulationsPanel.SetActive(false);
+        if (shuffledSceneIndices.Count == 0)
+        {
+            shuffledSceneIndices = GetSceneIndicesFromBuildSettings();
+            Shuffle(shuffledSceneIndices);
+        }
+        UpdateScoreText();
     }
 
     void Update()
     {
-        timeRemaining -= Time.deltaTime;
+        UpdateScoreText();
+    }
 
-        if (timeRemaining <= 0)
+    private void UpdateScoreText()
+    {
+        if (scoreText != null)
         {
-            timeRemaining = 0;
-            ShowGameOver();
+            scoreText.text = "Score: " + score;
         }
     }
 
-    public void OnLevelComplete()
+    public void AddPoints(int points)
     {
-        congratulationsPanel.SetActive(true);
-        scoreText.text = "Pontuação: " + score; // Mostra a pontuação
+        score += points;
+        Debug.Log($"Pontuação atual: {score}");
+        UpdateScoreText();
     }
 
-    public void ShowGameOver()
+    public void SubtractPoints(int points)
     {
-        gameOverPanel.SetActive(true);
-    }
-
-    public void Retry()
-    {
-        // Reinicia o nível
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
-
-    public void AddScore(int points)
-    {
-        score += points; // Adiciona os pontos ao total
-    }
-
-    public void OnCardMatched()
-    {
-        AddScore(5); // Aumenta a pontuação em 5 para cada par encontrado
-        matchedPairs++; // Aumenta a contagem de pares encontrados
-
-        // Verifica se o jogador completou o jogo
-        if (matchedPairs >= 4) // Já que você tem 4 pares
+        score -= points;
+        if (score < 0)
         {
-            OnLevelComplete();
+            score = 0;
+        }
+        Debug.Log($"Pontuação atual: {score}");
+        UpdateScoreText();
+    }
+
+    public void RespostaCorreta()
+    {
+        AddPoints(10);
+
+        // Verifica se todos os pares foram combinados
+        if (todosOsParesCombinados)
+        {
+            MostrarParabens(); // Chama o painel de parabéns
+        }
+        else
+        {
+            LoadNextScene();
+        }
+    }
+
+    // Método para definir que todos os pares foram combinados
+    public void DefinirTodosOsParesCombinados()
+    {
+        todosOsParesCombinados = true;
+    }
+
+    private void MostrarParabens()
+    {
+        if (parabenPanelController != null)
+        {
+            parabenPanelController.MostrarParabens(score);
+        }
+        else
+        {
+            Debug.LogError("ParabensPanelController não está atribuído!");
+        }
+    }
+
+    private void LoadNextScene()
+    {
+        if (currentSceneIndex < shuffledSceneIndices.Count)
+        {
+            int nextSceneIndex = shuffledSceneIndices[currentSceneIndex];
+            Debug.Log($"Carregando cena de índice: {nextSceneIndex}");
+            SceneManager.LoadScene(nextSceneIndex);
+            currentSceneIndex++;
+        }
+    }
+
+    public void PularCena()
+    {
+        LoadNextScene();
+    }
+
+    public void RespostaErrada()
+    {
+        SubtractPoints(5);
+    }
+
+    public void MenuPrincipal()
+    {
+        score = 0;
+        SceneManager.LoadScene("Menu");
+    }
+
+    public void ReiniciarJogo()
+    {
+        score = 0;
+        currentSceneIndex = 0;
+        shuffledSceneIndices.Clear();
+        shuffledSceneIndices = GetSceneIndicesFromBuildSettings();
+        Shuffle(shuffledSceneIndices);
+        LoadNextScene();
+    }
+
+    public void Jogar()
+    {
+        score = 0;
+        currentSceneIndex = 0;
+        shuffledSceneIndices.Clear();
+        shuffledSceneIndices = GetSceneIndicesFromBuildSettings();
+        Shuffle(shuffledSceneIndices);
+
+        // Carregar diretamente "Fase-01"
+        SceneManager.LoadScene("Fase-01");
+    }
+
+    // Função para obter os índices de cena do Build Settings
+    private List<int> GetSceneIndicesFromBuildSettings()
+    {
+        List<int> sceneIndices = new List<int>();
+        int sceneCount = SceneManager.sceneCountInBuildSettings;
+
+        // Adiciona todas as cenas do Build Settings (exceto a cena de Game Over)
+        for (int i = 0; i < sceneCount; i++)
+        {
+            string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
+            string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
+
+            // Ignorar a cena de Game Over, se for a última
+            if (!sceneName.Equals(gameOverSceneName))
+            {
+                sceneIndices.Add(i);
+            }
+        }
+        return sceneIndices;
+    }
+
+    private void Shuffle<T>(IList<T> list)
+    {
+        System.Random rng = new System.Random();
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            T value = list[k];
+            list[k] = list[n];
+            list[n] = value;
         }
     }
 }

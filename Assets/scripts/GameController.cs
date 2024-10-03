@@ -87,7 +87,7 @@ public class GameController : MonoBehaviour
     public void MenuPrincipal()
     {
         score = 0;
-        SceneManager.LoadScene("jogo");
+        SceneManager.LoadScene("Menu");
     }
 
     public void ReiniciarJogo()
