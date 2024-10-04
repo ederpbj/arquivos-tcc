@@ -24,6 +24,17 @@ public class GameAdmin : MonoBehaviour
             shuffledSceneIndices = GetSceneIndicesFromBuildSettings();
             Shuffle(shuffledSceneIndices);
         }
+
+        if (scoreText == null)
+        {
+            Debug.LogError("scoreText não está atribuído no inspector!");
+        }
+
+        if (parabenPanelController == null)
+        {
+            Debug.LogError("ParabensPanelController não está atribuído no inspector!");
+        }
+
         UpdateScoreText();
     }
 
@@ -100,6 +111,11 @@ public class GameAdmin : MonoBehaviour
             SceneManager.LoadScene(nextSceneIndex);
             currentSceneIndex++;
         }
+        else
+        {
+            Debug.LogWarning("Nenhuma cena restante para carregar.");
+            MostrarParabens(); // Mostra parabéns se não houver mais cenas para carregar
+        }
     }
 
     public void PularCena()
@@ -115,6 +131,7 @@ public class GameAdmin : MonoBehaviour
     public void MenuPrincipal()
     {
         score = 0;
+        currentSceneIndex = 0;
         SceneManager.LoadScene("Menu");
     }
 
@@ -161,6 +178,7 @@ public class GameAdmin : MonoBehaviour
         return sceneIndices;
     }
 
+    // Função para embaralhar os elementos da lista
     private void Shuffle<T>(IList<T> list)
     {
         System.Random rng = new System.Random();

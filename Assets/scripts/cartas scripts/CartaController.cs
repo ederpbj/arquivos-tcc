@@ -26,6 +26,10 @@ public class CartaController : MonoBehaviour
     {
         // Encontrar o GameAdmin na cena
         gameAdmin = FindObjectOfType<GameAdmin>();
+        if (gameAdmin == null)
+        {
+            Debug.LogError("GameAdmin não foi encontrado na cena!");
+        }
 
         // Adicionar esta carta à lista de todas as cartas
         if (todasCartas == null)
@@ -94,14 +98,17 @@ public class CartaController : MonoBehaviour
 
         if (!match)
         {
-            // Se não houve correspondência, fechar as cartas
-            primeiroClick.FecharCarta();
-            segundoClick.FecharCarta();
+            if (primeiroClick != null && segundoClick != null)
+            {
+                // Se não houve correspondência, fechar as cartas
+                primeiroClick.FecharCarta();
+                segundoClick.FecharCarta();
+            }
         }
 
-        // Desativar a proteção de clique nas cartas
-        primeiroClick.protecaoAtivada = false;
-        segundoClick.protecaoAtivada = false;
+        // Desativar a proteção de clique nas cartas, apenas se não forem nulas
+        if (primeiroClick != null) primeiroClick.protecaoAtivada = false;
+        if (segundoClick != null) segundoClick.protecaoAtivada = false;
 
         // Resetar os clicks
         primeiroClick = null;
@@ -121,7 +128,7 @@ public class CartaController : MonoBehaviour
     {
         foreach (CartaController carta in todasCartas)
         {
-            if (carta.cartaFrente.activeSelf) // Se a frente da carta ainda está ativa, ela não foi combinada
+            if (carta != null && carta.cartaFrente.activeSelf) // Se a carta ainda existir e a frente estiver ativa, ela não foi combinada
             {
                 return false;
             }
@@ -140,5 +147,16 @@ public class CartaController : MonoBehaviour
             todasCartas[i].transform.position = todasCartas[randomIndex].transform.position;
             todasCartas[randomIndex].transform.position = tempPosition;
         }
+    }
+
+    // Função para remover a carta da lista
+    public void RemoverCarta()
+    {
+        todasCartas.Remove(this);
+    }
+
+    private void OnDestroy()
+    {
+        RemoverCarta(); // Remover carta da lista ao ser destruída
     }
 }
