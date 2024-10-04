@@ -9,14 +9,14 @@ EditorBuildSettings:
     path: Assets/Scenes/MenuPrincipal.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
+    path: Assets/Scenes/Fase1.unity
+    guid: 3c47ea369dda14b7dbfec94a78023f49
+  - enabled: 1
     path: Assets/Scenes/Fase2.unity
     guid: 075e111e79afe03418644faef07d1d2d
   - enabled: 1
     path: Assets/Scenes/jogo.unity
     guid: 10915407407562146acba366621cb538
-  - enabled: 1
-    path: Assets/Scenes/Fase1.unity
-    guid: 21429c57a15c28b4ab3bb585ad8e336e
   - enabled: 1
     path: Assets/Scenes/LoadingScene.unity
     guid: 5b51e1e642ee7ac44a60e4ba9bef332c
