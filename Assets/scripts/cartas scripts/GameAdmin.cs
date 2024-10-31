@@ -8,14 +8,10 @@ public class GameAdmin : MonoBehaviour
     public static int score = 0;
     public TextMeshProUGUI scoreText;
     public string gameOverSceneName = "FimDeJogo";
+    public GameObject congratulationsPanel; // Painel de parabéns
+    public AudioSource congratulationsSound; // Referência ao AudioSource
     private static List<int> shuffledSceneIndices = new List<int>();
     private static int currentSceneIndex = 0;
-
-    // Referência ao controlador do painel de parabéns
-    public ParabensPanelController parabenPanelController;
-
-    // Variável para verificar se todos os pares foram combinados
-    private bool todosOsParesCombinados = false;
 
     void Start()
     {
@@ -25,11 +21,7 @@ public class GameAdmin : MonoBehaviour
             Shuffle(shuffledSceneIndices);
         }
         UpdateScoreText();
-    }
-
-    void Update()
-    {
-        UpdateScoreText();
+        congratulationsPanel.SetActive(false); // Inicialmente desativado
     }
 
     private void UpdateScoreText()
@@ -61,34 +53,19 @@ public class GameAdmin : MonoBehaviour
     public void RespostaCorreta()
     {
         AddPoints(10);
-
-        // Verifica se todos os pares foram combinados
-        if (todosOsParesCombinados)
-        {
-            MostrarParabens(); // Chama o painel de parabéns
-        }
-        else
-        {
-            LoadNextScene();
-        }
+        ShowCongratulationsPanel();
     }
 
-    // Método para definir que todos os pares foram combinados
-    public void DefinirTodosOsParesCombinados()
+    private void ShowCongratulationsPanel()
     {
-        todosOsParesCombinados = true;
+        congratulationsPanel.SetActive(true); // Mostra o painel
+        UpdateScoreText(); // Atualiza a pontuação no painel
+        congratulationsSound.Play(); // Toca o som de parabéns
     }
 
-    private void MostrarParabens()
+    public void ContinueToNextScene()
     {
-        if (parabenPanelController != null)
-        {
-            parabenPanelController.MostrarParabens(score);
-        }
-        else
-        {
-            Debug.LogError("ParabensPanelController não está atribuído!");
-        }
+        LoadNextScene();
     }
 
     private void LoadNextScene()
@@ -100,16 +77,11 @@ public class GameAdmin : MonoBehaviour
             SceneManager.LoadScene(nextSceneIndex);
             currentSceneIndex++;
         }
-    }
-
-    public void PularCena()
-    {
-        LoadNextScene();
-    }
-
-    public void RespostaErrada()
-    {
-        SubtractPoints(5);
+        else
+        {
+            Debug.LogWarning("Fim das fases. Carregando a tela de Fim de Jogo.");
+            SceneManager.LoadScene(gameOverSceneName);
+        }
     }
 
     public void MenuPrincipal()
@@ -128,31 +100,16 @@ public class GameAdmin : MonoBehaviour
         LoadNextScene();
     }
 
-    public void Jogar()
-    {
-        score = 0;
-        currentSceneIndex = 0;
-        shuffledSceneIndices.Clear();
-        shuffledSceneIndices = GetSceneIndicesFromBuildSettings();
-        Shuffle(shuffledSceneIndices);
-
-        // Carregar diretamente "Fase-01"
-        SceneManager.LoadScene("Fase-01");
-    }
-
-    // Função para obter os índices de cena do Build Settings
     private List<int> GetSceneIndicesFromBuildSettings()
     {
         List<int> sceneIndices = new List<int>();
         int sceneCount = SceneManager.sceneCountInBuildSettings;
 
-        // Adiciona todas as cenas do Build Settings (exceto a cena de Game Over)
         for (int i = 0; i < sceneCount; i++)
         {
             string scenePath = SceneUtility.GetScenePathByBuildIndex(i);
             string sceneName = System.IO.Path.GetFileNameWithoutExtension(scenePath);
 
-            // Ignorar a cena de Game Over, se for a última
             if (!sceneName.Equals(gameOverSceneName))
             {
                 sceneIndices.Add(i);
